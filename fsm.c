@@ -1,7 +1,7 @@
 /**
  * @file fsm.c
  * @brief an implementation for a FSM in C, this file contains 
- * implementation of definations.
+ * implementation of definitions.
  * @author Ankur Shrivastava
  */
 
@@ -9,10 +9,7 @@
 #include<stdlib.h>
 #include<string.h>
 
-#ifdef DEBUG
-#include<stdio.h>
-#endif
-
+#include "debug.h"
 
 /**
  * Function to initialize the FSM
@@ -20,9 +17,7 @@
  */
 int fsm_init(struct fsm_object *obj)
 {
-    #ifdef DEBUG
-    fprintf(stderr,"init FSM\n");
-    #endif
+    LOG("initializing  FSM\n");
     //initialize everything to Null or 0
     obj->fsm_base = NULL;
     obj->fsm_cur_state_name = NULL;
@@ -39,16 +34,27 @@ int fsm_init(struct fsm_object *obj)
  */
 int fsm_next_state(struct fsm_object *obj)
 {
+    if (obj == NULL)
+    {
+        LOG("FSM Object passed to '%s' in NULL\n",__func__);
+        return -1;
+    }
     struct fsm_state *tmp = obj->fsm_base;
     if ((obj->fsm_base==NULL)||(obj->fsm_cur_state_name==NULL))
     {        
+        LOG("FSM Not Initialised OR Terminated!!\n");
         return -1;
     }
     while ((tmp->name != obj->fsm_cur_state_name)&&(tmp!=NULL))
         tmp = tmp->next;
     if (tmp == NULL)
+    {
+        LOG("Error: State '%s' NOT FOUND for execution !!\n",obj->fsm_cur_state_name);
         return -1;
+    }
+    LOG("executing next state -> %s\n",tmp->name);
     tmp->function(obj,obj->fsm_arg_num,obj->fsm_arg_value);
+    LOG("execution of state complete -> %s\n",tmp->name);
     return 0;
 }
 
@@ -58,6 +64,7 @@ int fsm_next_state(struct fsm_object *obj)
  */
 int fsm_main(struct fsm_object *obj)
 {
+    LOG("Starting FSM main loop\n");
     while (!fsm_next_state(obj));
     return 0;
 }
@@ -72,6 +79,7 @@ int fsm_add(struct fsm_object *obj, char *state, void (*fun)(struct fsm_object *
 {
     struct fsm_state *tmp = obj->fsm_base;
     struct fsm_state *new_state = malloc(sizeof(struct fsm_state));
+    LOG("Adding new state '%s'\n",state);
     while(tmp->next)
         tmp = tmp->next;
     new_state->name = state;
@@ -89,16 +97,23 @@ int fsm_add(struct fsm_object *obj, char *state, void (*fun)(struct fsm_object *
 int fsm_remove(struct fsm_object *obj,char *state)
 {
     if (!strcmp(state,"default"))
+    {
+        LOG("Error: Cannot remove default state!!!\n");
         return -1;
+    }
     struct fsm_state *to_del;
     struct fsm_state *tmp=obj->fsm_base;
     while((tmp->next!=NULL)&&(strcmp(tmp->next->name,state)))
         tmp=tmp->next;
     if (tmp == NULL)
+    {
+        LOG("Error: State '%s' NOT FOUND while trying to remove it\n", state);
         return -1;
+    }
     to_del = tmp->next;
     tmp->next = tmp->next->next;
     free(to_del);
+    LOG("State '%s' removed\n", state);
     return 0;
 }
 
@@ -107,7 +122,7 @@ int fsm_remove(struct fsm_object *obj,char *state)
  * @details changes state to the new specified state, if the state does not exist returns error,
  * state change is not triggered till function calling fsm_to_state returns
  * @param obj pointer to structure of type fsm_object, which defines the FSM
- * @param state name of state to chnage to
+ * @param state name of state to change to
  * @param num number of arguments
  * @param arg arguments
  */
@@ -117,10 +132,11 @@ int fsm_to_state(struct fsm_object *obj, char *state, int num, void** arg)
     while((tmp!=NULL)&&(strcmp(tmp->name,state)))
         tmp=tmp->next;
     if (tmp == NULL)
+    {
+        LOG("New state '%s' NOT FOUND while setting next state!\n",state);
         return -1;
-    #ifdef DEBUG
-    fprintf(stderr,"Current State- %s\nNext State- %s\n", obj->fsm_cur_state_name, state);
-    #endif
+    }
+    LOG("Current State- %s\nNext State- %s\n", obj->fsm_cur_state_name, state);
     obj->fsm_cur_state = tmp;
     obj->fsm_cur_state_name = tmp->name;
     obj->fsm_arg_num = num;
@@ -144,6 +160,7 @@ int fsm_default(struct fsm_object *obj, void (*fun)(struct fsm_object *, int ,vo
     // set current state to default
     obj->fsm_cur_state = obj->fsm_base;
     obj->fsm_cur_state_name = obj->fsm_base->name;
+    LOG("Default State Added!\n");
     return 0;
 }
 
@@ -156,6 +173,7 @@ void fsm_terminate(struct fsm_object *obj)
     // delete all states to prevent memory leek
     struct fsm_state *tmp = obj->fsm_base;
     struct fsm_state *to_del=tmp;
+    LOG("Terminating FSM\n");
     while(tmp)
     {
         to_del = tmp;

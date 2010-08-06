@@ -51,5 +51,6 @@ int main()
     fsm_add(&obj,"hello",xyz);
     // starte the main FSM loop
     fsm_main(&obj);
+    //fsm_main(NULL);
     return 0;
 }
