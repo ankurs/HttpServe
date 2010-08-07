@@ -1,11 +1,11 @@
 /**
  * @file fsm.h
  * @brief an implementation for a FSM in C, this file contains 
- * all definations required for FSM.
+ * all definitions required for FSM.
  * @author Ankur Shrivastava
  */
 
-// forword decleration
+// forward declaration
 struct fsm_object;
 
 /**
@@ -68,7 +68,7 @@ int fsm_main(struct fsm_object *obj);
 
 /**
  * Execution of next state takes place here
- * @details function fsm_next can be used without fsm_main when we want to hadel
+ * @details function fsm_next can be used without fsm_main when we want to handle
  * state execution and not rely on fsm_main 's loop
  * @param obj pointer to structure of type fsm_object, which defines the FSM
  */
@@ -103,7 +103,7 @@ int fsm_remove(struct fsm_object *obj, char *state);
  * @details changes state to the new specified state, if the state does not exist returns error,
  * state change is not triggered till function calling fsm_to_state returns
  * @param obj pointer to structure of type fsm_object, which defines the FSM
- * @param state name of state to chnage to
+ * @param state name of state to change to
  * @param num number of arguments
  * @param arg arguments
  */

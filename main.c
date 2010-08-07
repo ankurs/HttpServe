@@ -1,5 +1,6 @@
 // Program to test FSM
 #include "fsm.h"
+#include "confpar.h"
 #include<stdio.h>
 
 void abc(struct fsm_object *obj, int val,void **arg)
@@ -50,7 +51,11 @@ int main()
     fsm_add(&obj,"qwerty",pqr);
     fsm_add(&obj,"hello",xyz);
     // starte the main FSM loop
-    fsm_main(&obj);
-    //fsm_main(NULL);
+    //fsm_main(&obj);
+    fsm_main(NULL);
+    confpar_t conf;
+    confpar_object_init(&conf);
+    conf.filepath = "abc.xml";
+    confpar_update(&conf);
     return 0;
 }

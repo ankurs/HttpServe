@@ -36,7 +36,7 @@ int fsm_next_state(struct fsm_object *obj)
 {
     if (obj == NULL)
     {
-        LOG("FSM Object passed to '%s' in NULL\n",__func__);
+        LOG("FSM Object passed to '%s' is NULL\n",__func__);
         return -1;
     }
     struct fsm_state *tmp = obj->fsm_base;

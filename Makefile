@@ -1,13 +1,15 @@
-# a simple make file for FSM
+LIBXMLPATH = `xml2-config --cflags --libs`
 
-CC = gcc
+CC = gcc $(LIBXMLPATH)
 LDFLAGS = -lm
+
 # set DEBUG options
 ifdef DEBUG
 CFLAGS = -Wall -Wextra -ggdb -pg -DDEBUG
 else
 CFLAGS = -Wall -Os
 endif
+
 #name all the object files
 OBJS = main.o fsm.o confpar.o 
 
