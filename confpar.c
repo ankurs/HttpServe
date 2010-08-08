@@ -53,7 +53,7 @@ static void print_element_names(xmlNode * a_node, const xmlChar* parent)
 
     for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
         if (cur_node->type == XML_ELEMENT_NODE && parent != NULL) {
-            printf("Parent : %s Element Name: %s\n", parent, cur_node->name);
+            printf("Parent : %s Element Name: '%s' contains %s\n", parent, cur_node->name, cur_node->content);
         }
 
         print_element_names(cur_node->children, cur_node->name);
