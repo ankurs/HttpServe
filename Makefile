@@ -1,7 +1,9 @@
 LIBXMLPATH = `xml2-config --cflags --libs`
+LIBEVENTCFLAGS = -I/usr/local/include
+LIBEVENTLDFLAGS = -L/usr/local/lib -levent
 
-CC = gcc $(LIBXMLPATH)
-LDFLAGS = -lm
+CC = gcc $(LIBXMLPATH) $(LIBEVENTCFLAGS)
+LDFLAGS = -lm $(LIBEVENTLDFLAGS)
 
 # set DEBUG options
 ifdef DEBUG
@@ -11,7 +13,7 @@ CFLAGS = -Wall -Os
 endif
 
 #name all the object files
-OBJS = main.o fsm.o confpar.o 
+OBJS = main.o fsm.o confpar.o libe.o
 
 
 all : $(OBJS)
@@ -28,7 +30,7 @@ doxy :
 	sh update_doc.sh	
 
 clean :
-	rm -rf $(OBJS) httpserve
+	rm -rf $(OBJS) httpserve doc/ manual.pdf
 
 cs :
 	cscope -b

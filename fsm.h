@@ -52,6 +52,12 @@ struct fsm_object{
      * values of arguments passed to the next state
      */
     void ** fsm_arg_value;
+
+    /**
+     * specifies if this FSM is running in an fsm loop or not
+     * setting it to zero will terminate the fsm
+     */
+    int fsm_running;
 };
 
 /**
@@ -114,3 +120,9 @@ int fsm_to_state(struct fsm_object *obj, char *state, int num, void** arg);
  * @param obj pointer to structure of type fsm_object, which defines the FSM
  */
 void fsm_terminate(struct fsm_object *obj);
+
+/**
+ * Function clean the fsm_object cleaning (free) the states inside the objects
+ * @param obj pointer to structure of type fsm_object, which defines the FSM
+ */
+void fsm_delete(struct fsm_object *obj);

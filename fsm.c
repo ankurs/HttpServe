@@ -23,6 +23,7 @@ int fsm_init(struct fsm_object *obj)
     obj->fsm_cur_state_name = NULL;
     obj->fsm_arg_num = 0;
     obj->fsm_arg_value = NULL;
+    obj->fsm_running = 0;
     return 0;
 }
 
@@ -65,7 +66,13 @@ int fsm_next_state(struct fsm_object *obj)
 int fsm_main(struct fsm_object *obj)
 {
     LOG("Starting FSM main loop\n");
-    while (!fsm_next_state(obj));
+    if (obj == NULL)
+    {
+        LOG("FSM object passed to fsm_main loop is NULL\n");
+        return -1;
+    }
+    obj->fsm_running = 1;
+    while (!fsm_next_state(obj) && obj->fsm_running != 0);
     return 0;
 }
 
@@ -165,15 +172,15 @@ int fsm_default(struct fsm_object *obj, void (*fun)(struct fsm_object *, int ,vo
 }
 
 /**
- * Function for FSM termination
+ * Function for FSM deletion
  * @param obj pointer to structure of type fsm_object, which defines the FSM
  */
-void fsm_terminate(struct fsm_object *obj)
+void fsm_delete(struct fsm_object *obj)
 {
     // delete all states to prevent memory leek
     struct fsm_state *tmp = obj->fsm_base;
     struct fsm_state *to_del=tmp;
-    LOG("Terminating FSM\n");
+    LOG("Deleting FSM\n");
     while(tmp)
     {
         to_del = tmp;
@@ -185,4 +192,5 @@ void fsm_terminate(struct fsm_object *obj)
     obj->fsm_cur_state = NULL;
     obj->fsm_cur_state_name = NULL;
     obj->fsm_base = NULL;
+    obj->fsm_running = 0;
 }

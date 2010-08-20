@@ -4,6 +4,7 @@
 #include<stdlib.h>
 #include<libxml/tree.h>
 #include<libxml/parser.h>
+#include<string.h>
 
 #include "debug.h"
 
@@ -50,12 +51,16 @@ void confpar_object_init(confpar_t * confpar)
 static void print_element_names(xmlNode * a_node, const xmlChar* parent)
 {
     xmlNode *cur_node = NULL;
-
     for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
         if (cur_node->type == XML_ELEMENT_NODE && parent != NULL) {
-            printf("Parent : %s Element Name: '%s' contains %s\n", parent, cur_node->name, cur_node->content);
+            xmlChar * content = xmlNodeGetContent(cur_node);
+            printf("Parent : %s Element Name: '%s' contains %s, line %d\n", parent, cur_node->name, content, cur_node->line);
         }
-
+        if (cur_node->type == XML_TEXT_NODE && cur_node->children == NULL)
+        {
+            xmlChar * content = xmlNodeGetContent(cur_node);
+            printf("Children NULL, value -> %s\n", content);
+        }
         print_element_names(cur_node->children, cur_node->name);
     }
 }
@@ -64,6 +69,7 @@ static void print_element_names(xmlNode * a_node, const xmlChar* parent)
 /**
  * Function that parses the config file and updates key values pairs
  * @param confpar confpar_t object which will contain all the info after the file is parsed
+ * @todo finish implemtntation of this function after doc is defined
  */
 int confpar_update(confpar_t * confpar)
 {

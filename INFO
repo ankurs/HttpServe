@@ -1,0 +1,6 @@
+If you have installed libevent-2.0.6-rc in /usr/local/lib
+add 
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+to your .bashrc
+
+

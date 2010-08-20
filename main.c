@@ -1,4 +1,7 @@
-// Program to test FSM
+/**
+ * @todo define how config will work with the system and the basic structure
+ * @todo get a basic libevent implementation working 
+ */
 #include "fsm.h"
 #include "confpar.h"
 #include<stdio.h>
@@ -38,7 +41,7 @@ void xyz(struct fsm_object *obj, int val,void **arg)
     fsm_to_state(obj,"qwerty",0,NULL);
 }
 
-
+/*
 int main()
 {
     // create FSM object
@@ -54,8 +57,9 @@ int main()
     //fsm_main(&obj);
     fsm_main(NULL);
     confpar_t conf;
-    confpar_object_init(&conf);
+    confpar_object_init(&conf);    
     conf.filepath = "abc.xml";
     confpar_update(&conf);
     return 0;
 }
+*/

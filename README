@@ -1,1 +1,3 @@
 implementation for a libevent based web server in C
+
+NOTE: you will need to install libevent-2
