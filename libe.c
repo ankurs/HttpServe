@@ -13,6 +13,8 @@ int evthread_use_pthreads(void);
 #include<arpa/inet.h>
 #include<string.h>
 
+#include<dlfcn.h>
+
 
 void callback (struct evconnlistener *listener, evutil_socket_t sock,
         struct sockaddr *addr, int len, void *ptr)
@@ -77,15 +79,43 @@ int main()
             LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, 10, (struct sockaddr *) &addr,
             sizeof(struct sockaddr_in));
     evconnlistener_enable(ev_list);
-    //event_base_dispatch(ev_base);
-    
+
+    // dynamic 
+    void *lib_handle;
+    void (*fn)(int);
+    char *error;
+
+    lib_handle = dlopen("sharedtest.so.1.0",RTLD_LAZY);
+    {
+        if (!lib_handle)
+        {
+            fprintf(stderr,"%s\n",dlerror());
+            return -1;
+        }
+    }
+
+    fn = dlsym(lib_handle,"stest");
+    if ((error = dlerror()) != NULL)
+    {
+        fprintf("%s\n",error);
+        return -1;        
+    }
+
+    (*fn)(10);
+    dlclose(lib_handle);
+    // done dynamic
+
+    event_base_dispatch(ev_base);
+
+    /*
     while (1)
     {
         // set timeout to 1 sec
         event_base_loopexit(ev_base, &time_val);
         event_base_dispatch(ev_base);
         LOG("Tick\n");
-    }    
+    } 
+    */
 
     /* NON BLOCKING IO
      #include<fcntl.h>
