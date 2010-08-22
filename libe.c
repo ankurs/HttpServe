@@ -1,8 +1,3 @@
-#ifdef _EVENT_HAVE_PTHREADS
-int evthread_use_pthreads(void);
-#define EVTHREAD_USE_PTHREADS_IMPLEMENTED
-#endif
-
 #include "debug.h"
 #include<event2/event.h>
 #include<event2/listener.h>
@@ -15,11 +10,13 @@ int evthread_use_pthreads(void);
 
 #include<dlfcn.h>
 
+static void run(evutil_socket_t socket);
 
 void callback (struct evconnlistener *listener, evutil_socket_t sock,
         struct sockaddr *addr, int len, void *ptr)
 {
     LOG("Got A Connection\n");
+    run(sock);
 }
 
 int main()
@@ -85,7 +82,7 @@ int main()
     void (*fn)(int);
     char *error;
 
-    lib_handle = dlopen("sharedtest.so.1.0",RTLD_LAZY);
+    lib_handle = dlopen("sharedtest.so.1",RTLD_LAZY);
     {
         if (!lib_handle)
         {
@@ -97,7 +94,7 @@ int main()
     fn = dlsym(lib_handle,"stest");
     if ((error = dlerror()) != NULL)
     {
-        fprintf("%s\n",error);
+        fprintf(stderr,"%s\n",error);
         return -1;        
     }
 
@@ -129,3 +126,4 @@ int main()
     event_base_free(ev_base);
     return 0;
 }
+

@@ -1,9 +1,10 @@
-LIBXMLPATH = `xml2-config --cflags --libs`
+LIBXMLCFLAGS = `xml2-config --cflags`
+LIBXMLLDFLAGS = `xml2-config --libs`
 LIBEVENTCFLAGS = -I/usr/local/include
 LIBEVENTLDFLAGS = -L/usr/local/lib -levent
 
-CC = gcc $(LIBXMLPATH) $(LIBEVENTCFLAGS) -fPIC -rdynamic
-LDFLAGS = -lm $(LIBEVENTLDFLAGS) -ldl
+CC = gcc $(LIBXMLCFLAGS) $(LIBEVENTCFLAGS) -fPIC
+LDFLAGS = -lm $(LIBXMLLDFLAGS) $(LIBEVENTLDFLAGS) -ldl -rdynamic
 
 # set DEBUG options
 ifdef DEBUG
@@ -13,9 +14,9 @@ CFLAGS = -Wall -Os
 endif
 
 #name all the object files
-OBJS = main.o fsm.o confpar.o libe.o
+OBJS = main.o fsm.o confpar.o libe.o httpd.o
 SHAREDOBJS = stest.o
-SHAREDLIBS = sharedtest.so.1.0
+SHAREDLIBS = sharedtest.so.1
 
 all : httpserve libs 
 
@@ -25,10 +26,10 @@ httpserve : $(OBJS)
 libs: $(SHAREDOBJS) $(SHAREDLIBS)
 
 debug :
-	make all DEBUG=1	
+	make all DEBUG=1
 
-sharedtest.so.1.0 :
-	$(CC) $(CFLAGS) -shared -Wl,-soname,sharedtest.so.1 -o sharedtest.so.1.0 stest.o
+sharedtest.so.1 : stest.o
+	$(CC) $(CFLAGS) -shared -Wl,-soname,$@ -o $@ $^
 
 %.o : %.c
 	$(CC) $(CFLAGS) -o $@ -c $^

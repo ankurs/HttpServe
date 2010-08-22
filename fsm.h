@@ -20,7 +20,7 @@ struct fsm_state{
     /**
      * stores the function pointer for the state
      */
-    void (*function)(struct fsm_object* ,int,void**);
+    void (*function)(struct fsm_object* ,int, void**);
     /**
      * pointer to the next state
      */
