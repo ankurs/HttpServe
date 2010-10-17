@@ -2,6 +2,8 @@
 #include<event2/event.h>
 #include<event2/listener.h>
 #include<stdio.h>
+#include<stdlib.h>
+#include<errno.h>
 
 #include<sys/socket.h>
 #include<netinet/in.h>
@@ -10,14 +12,98 @@
 
 #include<dlfcn.h>
 
-static void run(evutil_socket_t socket);
+#include<pthread.h>
+
+#include<http_parser.h>
+
+extern void run(evutil_socket_t socket);
+void on_conn(evutil_socket_t socket);
 
 void callback (struct evconnlistener *listener, evutil_socket_t sock,
         struct sockaddr *addr, int len, void *ptr)
 {
     LOG("Got A Connection\n");
-    run(sock);
+    //run(sock);
+    on_conn(sock);
 }
+
+int running = 1;
+
+int header_complete (http_parser *parser)
+{
+    LOG("Header Complete\n");
+    return 0;
+}
+
+int message_begin(http_parser *parser)
+{
+    LOG("Message Begin\n");
+    return 0;
+}
+
+int message_complete(http_parser *parser)
+{
+    LOG("Message Complete");
+    running = 0;
+    return 0;
+}
+
+int on_something(http_parser *parser, const char *at, size_t length)
+{
+    LOG("Length -> %d\nValue -> %s\n", (int) length, at);
+    return 0;
+}
+
+int path(http_parser *parser, const char *at, size_t length)
+{
+    LOG("Path \nLength -> %d\nValue -> %s\n", (int) length, at);
+    return 0;
+}
+
+int query_string(http_parser *parser, const char *at, size_t length)
+{
+    LOG("Query String \nLength -> %d\nValue -> %s\n", (int) length, at);
+    return 0;
+}
+
+
+void on_conn(evutil_socket_t socket)
+{
+    int sock = (int) socket;
+    LOG("Got Connection\n");
+    http_parser_settings settings;
+    settings.on_message_begin = message_begin;
+    settings.on_message_complete = message_complete;
+    settings.on_headers_complete = header_complete;
+    settings.on_path = path;
+    settings.on_query_string = query_string;
+    settings.on_url = on_something;
+    settings.on_fragment  = on_something;
+    settings.on_body = on_something;
+    settings.on_header_field = on_something;
+    settings.on_header_value = on_something;
+
+    http_parser *parser = malloc(sizeof(http_parser));
+    http_parser_init(parser, HTTP_REQUEST);
+
+    ssize_t got;
+    size_t len = 1000;
+    char buf[len];
+
+    got = recv(sock, buf, len, 0);
+    while (got == -1)
+    {
+        perror("error");
+        got = recv(sock, buf, len, 0);          
+    }
+    LOG("Got %d bytes of data\n", (int) got);
+    if (got > 0)
+    {
+        http_parser_execute(parser, &settings, buf, got);
+    }    
+    close(sock);
+}
+
 
 int main()
 {
@@ -72,9 +158,10 @@ int main()
     addr.sin_port = htons(9900);
 
     struct evconnlistener * ev_list;
-    ev_list = evconnlistener_new_bind(ev_base, callback, NULL,            
-            LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, 10, (struct sockaddr *) &addr,
-            sizeof(struct sockaddr_in));
+    ev_list = evconnlistener_new_bind(ev_base, callback, NULL,
+            LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, 10, 
+            (struct sockaddr *) &addr, sizeof(struct sockaddr_in)
+            );
     evconnlistener_enable(ev_list);
 
     // dynamic 

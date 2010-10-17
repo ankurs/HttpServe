@@ -68,7 +68,7 @@ int readline(int soc, char *line, int len)
 
 char * get_file(char* line)
 {
-    char *tmp = strcasestr(line,"GET");
+    char *tmp = strstr(line,"GET");
     fprintf(stderr,"get_file %s\n",line);
     if (tmp)
     {
@@ -95,7 +95,7 @@ char * get_file(char* line)
 
 void run(evutil_socket_t socket)
 {
-    int connfd = (int) socket;
+    int connfd = (int) socket;    
     // handle HTTP request here
     // DIRTY Clean it
     char *line;
@@ -138,13 +138,13 @@ void run(evutil_socket_t socket)
     { // if file exists 
         int fd = open(filename,O_RDONLY); // open file
         size_t size = file_status.st_size; // get size
-        sprintf(con_len,"Content-length: %i \r\n\r\n",size); // set file size
+        sprintf(con_len,"Content-length: %i \r\n\r\n",(int)size); // set file size
         write(connfd,con_len,strlen(con_len)); // send Content-length
         sendfile(connfd,fd,NULL,size); // send file
     }
     else
     { // send file not found
-        sprintf(con_len,"Content-length: %i \r\n\r\n",strlen(page_not_found));
+        sprintf(con_len,"Content-length: %i \r\n\r\n",(int) strlen(page_not_found));
         write(connfd,con_len,strlen(con_len));
         write(connfd,page_not_found,strlen(page_not_found));
     }

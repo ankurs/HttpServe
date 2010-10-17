@@ -3,18 +3,20 @@ LIBXMLLDFLAGS = `xml2-config --libs`
 LIBEVENTCFLAGS = -I/usr/local/include
 LIBEVENTLDFLAGS = -L/usr/local/lib -levent
 
-CC = gcc $(LIBXMLCFLAGS) $(LIBEVENTCFLAGS) -fPIC
-LDFLAGS = -lm $(LIBXMLLDFLAGS) $(LIBEVENTLDFLAGS) -ldl -rdynamic
+HTTP_PARSER_CFLAGS = -Ihttp-parser/
+
+CC = gcc $(LIBXMLCFLAGS) $(LIBEVENTCFLAGS) -fPIC $(HTTP_PARSER_CFLAGS)
+LDFLAGS = -lm $(LIBXMLLDFLAGS) $(LIBEVENTLDFLAGS) -ldl -rdynamic -lpthread
 
 # set DEBUG options
 ifdef DEBUG
 CFLAGS = -Wall -Wextra -ggdb -pg -DDEBUG
 else
-CFLAGS = -Wall -Os
+CFLAGS = -Wall -O2
 endif
 
 #name all the object files
-OBJS = main.o fsm.o confpar.o libe.o httpd.o
+OBJS = main.o fsm.o confpar.o libe.o  http-parser/http_parser.o
 SHAREDOBJS = stest.o
 SHAREDLIBS = sharedtest.so.1
 
@@ -42,8 +44,8 @@ clean :
 	rm -rf $(OBJS) $(SHAREDOBJS) $(SHAREDLIBS) httpserve doc/ manual.pdf
 
 cs :
-	cscope -b
+	cscope -bR
 
 cscope :
-	cscope -b
+	cscope -bR
 

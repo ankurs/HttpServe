@@ -1,3 +1,5 @@
+#ifndef FSM_H
+#define FSM_H
 /**
  * @file fsm.h
  * @brief an implementation for a FSM in C, this file contains 
@@ -126,3 +128,4 @@ void fsm_terminate(struct fsm_object *obj);
  * @param obj pointer to structure of type fsm_object, which defines the FSM
  */
 void fsm_delete(struct fsm_object *obj);
+#endif
